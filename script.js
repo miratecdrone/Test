@@ -25,7 +25,7 @@ function authenticateUser() {
                 // 「YYYY/MM/DD」形式の日付文字列を正確にパース
                 const [year, month, day] = validUntilString.split('/');
                 const validUntil = new Date(year, month - 1, day);  // 月は0から始まる
-
+JOptionPane.showMessageDialog(null, 'new Date');
                 if (storedAccountId === accountId) {
                     if (new Date() <= validUntil) {
                         isAuthenticated = true;
