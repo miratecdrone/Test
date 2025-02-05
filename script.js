@@ -16,13 +16,18 @@ function authenticateUser() {
             const json = JSON.parse(text.substring(47).slice(0, -2));
             const rows = json.table.rows;
 
+            let isAuthenticated = false;
+
             for (const row of rows) {
                 const storedAccountId = row.c[0].v;
-                const validUntil = new Date(row.c[1].v);
+                const validUntilString = row.c[1].v;
+
+                // スプレッドシートの日付文字列を確実にパース
+                const validUntil = new Date(validUntilString);
 
                 if (storedAccountId === accountId) {
                     if (new Date() <= validUntil) {
-                        authenticated = true;
+                        isAuthenticated = true;
                         window.location.href = 'quiz.html';
                         return;
                     } else {
@@ -32,7 +37,9 @@ function authenticateUser() {
                 }
             }
 
-            document.getElementById('error-message').textContent = "アカウントIDが無効です。";
+            if (!isAuthenticated) {
+                document.getElementById('error-message').textContent = "アカウントIDが無効です。";
+            }
         })
         .catch(error => {
             console.error("認証エラー:", error);
