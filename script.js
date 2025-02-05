@@ -1,39 +1,9 @@
-const ACCOUNT_SPREADSHEET_ID = '1Od2KFQtsHvsXlA3ACP5TCe4QO0EvrE95g7bd9g3SA4Q';
-const ACCOUNT_API_URL = `https://docs.google.com/spreadsheets/d/${ACCOUNT_SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
-
-const QUESTIONS_SPREADSHEET_ID = '1EmLHs1hDz7ECYz8GwHmY9tiHh-Vh4MiWHCx7UgHCASQ';
-const QUESTIONS_API_URL = `https://docs.google.com/spreadsheets/d/${QUESTIONS_SPREADSHEET_ID}/gviz/tq?tqx=out:json`;
-
 let questions = [];
 let currentQuestionIndex = 0;
 let timerInterval;
 let score = 0;
-let answeredQuestions = new Set();
+let answeredQuestions = {};
 let incorrectQuestions = [];
-
-// アカウント認証
-function authenticateUser() {
-    const accountId = document.getElementById('account-id').value.trim();
-    fetch(ACCOUNT_API_URL)
-        .then(response => response.text())
-        .then(text => {
-            const json = JSON.parse(text.substring(47).slice(0, -2));
-            const rows = json.table.rows;
-            for (const row of rows) {
-                const storedAccountId = row.c[0].v;
-                const validUntilString = row.c[1].v;
-                const [year, month, day] = validUntilString.split('/').map(num => parseInt(num, 10));
-                const validUntil = new Date(year, month - 1, day);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                if (storedAccountId === accountId && today <= validUntil) {
-                    window.location.href = 'quiz.html';
-                    return;
-                }
-            }
-            document.getElementById('error-message').textContent = "アカウントIDが無効か、期限切れです。";
-        });
-}
 
 // 試験問題の取得
 function fetchQuestions() {
@@ -50,7 +20,7 @@ function fetchQuestions() {
         });
 }
 
-// コース選択による試験開始
+// 試験開始
 function startCourse(numQuestions, timeLimit) {
     document.getElementById('course-selection').style.display = 'none';
     document.getElementById('quiz-area').style.display = 'block';
@@ -70,6 +40,7 @@ function startTimer(minutes) {
         const minutesLeft = Math.floor(remainingTime / 60000);
         const secondsLeft = Math.floor((remainingTime % 60000) / 1000);
         document.getElementById('time-left').textContent = `${minutesLeft}分 ${secondsLeft}秒`;
+
         if (remainingTime <= 0) {
             clearInterval(timerInterval);
             showResults();
@@ -90,36 +61,66 @@ function shuffle(array) {
 function renderQuestion(index) {
     currentQuestionIndex = index;
     const questionData = questions[index];
+
+    document.getElementById('current-question-number').textContent = `${index + 1}問目`;
     document.getElementById('question-text').textContent = questionData.question;
+
     const answerList = document.getElementById('answer-list');
     answerList.innerHTML = '';
+
     questionData.options.forEach((option, i) => {
         const li = document.createElement('li');
         li.textContent = option;
         li.onclick = () => handleAnswer(index, option, li);
+        if (answeredQuestions[index] === option) {
+            li.style.backgroundColor = '#4caf50';  // 選択済みの色
+        }
         answerList.appendChild(li);
     });
+
+    renderNavButtons();
 }
 
 // 解答の処理
 function handleAnswer(questionIndex, selectedOption, liElement) {
-    if (answeredQuestions.has(questionIndex)) return;  
-    answeredQuestions.add(questionIndex);
+    answeredQuestions[questionIndex] = selectedOption;
+
     const questionData = questions[questionIndex];
+    document.querySelectorAll('#answer-list li').forEach(li => li.style.backgroundColor = '');
+
     if (selectedOption === questionData.correct) {
-        score++;
-        liElement.style.backgroundColor = '#4caf50'; 
+        liElement.style.backgroundColor = '#4caf50';  // 正解の色
     } else {
-        incorrectQuestions.push(questionData);
-        liElement.style.backgroundColor = '#f44336';  
+        liElement.style.backgroundColor = '#f44336';  // 不正解の色
     }
-    setTimeout(() => {
-        if (currentQuestionIndex + 1 < questions.length) {
-            renderQuestion(currentQuestionIndex + 1);
-        } else {
-            showResults();
-        }
-    }, 1000);
+}
+
+// 前の問題へ戻る
+function prevQuestion() {
+    if (currentQuestionIndex > 0) {
+        renderQuestion(currentQuestionIndex - 1);
+    }
+}
+
+// 次の問題へ進む
+function nextQuestion() {
+    if (currentQuestionIndex + 1 < questions.length) {
+        renderQuestion(currentQuestionIndex + 1);
+    }
+}
+
+// ナビゲーションボタンの表示
+function renderNavButtons() {
+    const navButtons = document.getElementById('nav-buttons');
+    navButtons.innerHTML = '';
+
+    questions.forEach((_, i) => {
+        const button = document.createElement('button');
+        button.textContent = i + 1;
+        button.classList.add(answeredQuestions[i] ? 'answered' : 'unanswered');
+        button.onclick = () => renderQuestion(i);
+        navButtons.appendChild(button);
+    });
 }
 
 // 結果の表示
@@ -127,13 +128,21 @@ function showResults() {
     clearInterval(timerInterval);
     document.getElementById('quiz-area').style.display = 'none';
     document.getElementById('result-area').style.display = 'block';
+
+    score = Object.keys(answeredQuestions).filter(i => {
+        return answeredQuestions[i] === questions[i].correct;
+    }).length;
+
     document.getElementById('score').textContent = `${score} / ${questions.length}`;
     const incorrectList = document.getElementById('incorrect-answers');
     incorrectList.innerHTML = '';
-    incorrectQuestions.forEach(question => {
-        const li = document.createElement('li');
-        li.textContent = `${question.question} - 正解: ${question.correct} - 解説: ${question.explanation}`;
-        incorrectList.appendChild(li);
+
+    questions.forEach((question, i) => {
+        if (answeredQuestions[i] !== question.correct) {
+            const li = document.createElement('li');
+            li.textContent = `${question.question} - 正解: ${question.correct} - 解説: ${question.explanation}`;
+            incorrectList.appendChild(li);
+        }
     });
 }
 
