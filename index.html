@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>スプレッドシートからリストを表示</title>
+    <title>JSONからスプレッドシートデータを表示</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,31 +21,32 @@
     </style>
 </head>
 <body>
-    <h1>スプレッドシートから動的にリストを表示</h1>
+    <h1>スプレッドシートのリストを表示</h1>
     <div id="list-container">リストを取得中...</div>
 
     <script>
-        // GoogleスプレッドシートのJSONデータを取得
-        const sheetId = '1EmLHs1hDz7ECYz8GwHmY9tiHh-Vh4MiWHCx7UgHCASQ';  // SHEET_IDを入れる
-        const url = `https://spreadsheets.google.com/feeds/list/${sheetId}/od6/public/values?alt=json`;
+        async function fetchJSONData() {
+            const sheetId = '1EmLHs1hDz7ECYz8GwHmY9tiHh-Vh4MiWHCx7UgHCASQ';
+            const jsonUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
+            try {
+                const response = await fetch(jsonUrl);
+                const text = await response.text();
+
+                // 不要な部分を削除してJSONとして解析
+                const jsonData = JSON.parse(text.substr(47).slice(0, -2));
+                const rows = jsonData.table.rows;
+
                 const container = document.getElementById('list-container');
-                container.innerHTML = '';  // 初期表示の「リストを取得中」をクリア
+                container.innerHTML = '';
 
-                // スプレッドシートのエントリごとにリストを作成
-                data.feed.entry.forEach(entry => {
+                rows.forEach(row => {
+                    const name = row.c[0]?.v || '';
+                    const link = row.c[1]?.v || '';
+                    const description = row.c[2]?.v || '';
+
                     const listItem = document.createElement('div');
                     listItem.classList.add('item');
-
-                    // スプレッドシートの各列のデータを取得
-                    const name = entry['gsx$リスト名']['$t'];
-                    const link = entry['gsx$リンク']['$t'];
-                    const description = entry['gsx$説明']['$t'];
-
-                    // HTMLのリスト要素を作成
                     listItem.innerHTML = `
                         <h3>${name}</h3>
                         <p>${description}</p>
@@ -53,11 +54,14 @@
                     `;
                     container.appendChild(listItem);
                 });
-            })
-            .catch(error => {
+            } catch (error) {
                 document.getElementById('list-container').innerText = 'データの取得に失敗しました。';
-                console.error('エラーが発生しました:', error);
-            });
+                console.error('エラー:', error);
+            }
+        }
+
+        // ページ読み込み時に実行
+        fetchJSONData();
     </script>
 </body>
 </html>
