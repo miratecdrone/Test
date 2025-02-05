@@ -22,25 +22,33 @@ function authenticateUser() {
                 const storedAccountId = row.c[0].v;
                 const validUntilString = row.c[1].v;
 
-                // 「YYYY/MM/DD」形式の日付文字列を正確にパース
-                const [year, month, day] = validUntilString.split('/');
-                const validUntil = new Date(year, month - 1, day);  // 月は0から始まる
+                // 「YYYY/MM/DD」形式をパース
+                if (validUntilString.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+                    const [year, month, day] = validUntilString.split('/').map(num => parseInt(num, 10));
+                    const validUntil = new Date(year, month - 1, day);  // 月は0から始まる
 
-                // 現在の日付の時刻をクリアして比較
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);  // 現在の日付を00:00にリセット
-                validUntil.setHours(0, 0, 0, 0);  // 有効期限も00:00にリセット
-console.log("今日の日付:", today);
-console.log("有効期限:", validUntil);
-                if (storedAccountId === accountId) {
-                    if (today <= validUntil) {
-                        isAuthenticated = true;
-                        window.location.href = 'quiz.html';
-                        return;
-                    } else {
-                        document.getElementById('error-message').textContent = "アカウントの有効期限が切れています。";
-                        return;
+                    // 今日の日付を比較用にリセット
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    validUntil.setHours(0, 0, 0, 0);
+
+                    // デバッグ用ログ
+                    console.log("今日の日付:", today);
+                    console.log("有効期限:", validUntil);
+
+                    if (storedAccountId === accountId) {
+                        if (today <= validUntil) {
+                            isAuthenticated = true;
+                            window.location.href = 'quiz.html';
+                            return;
+                        } else {
+                            document.getElementById('error-message').textContent = "アカウントの有効期限が切れています。";
+                            return;
+                        }
                     }
+                } else {
+                    document.getElementById('error-message').textContent = "無効な日付形式です。";
+                    return;
                 }
             }
 
