@@ -22,8 +22,9 @@ function authenticateUser() {
                 const storedAccountId = row.c[0].v;
                 const validUntilString = row.c[1].v;
 
-                // スプレッドシートの日付文字列を確実にパース
-                const validUntil = new Date(validUntilString);
+                // 「YYYY/MM/DD」形式の日付文字列を正確にパース
+                const [year, month, day] = validUntilString.split('/');
+                const validUntil = new Date(year, month - 1, day);  // 月は0から始まる
 
                 if (storedAccountId === accountId) {
                     if (new Date() <= validUntil) {
