@@ -1,0 +1,13 @@
+{
+  "name": "exam-app",
+  "version": "1.0.0",
+  "description": "模擬試験システムのデスクトップアプリ",
+  "main": "main.js",
+  "author": "Your Name",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^24.0.0" 
+  }
+}
