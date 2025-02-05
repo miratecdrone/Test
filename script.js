@@ -24,33 +24,17 @@ function authenticateUser() {
             for (const row of rows) {
                 const storedAccountId = row.c[0].v;
                 const validUntilString = row.c[1].v;
+                const [year, month, day] = validUntilString.split('/').map(num => parseInt(num, 10));
+                const validUntil = new Date(year, month - 1, day);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
 
-                if (validUntilString.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
-                    const [year, month, day] = validUntilString.split('/').map(num => parseInt(num, 10));
-                    const validUntil = new Date(year, month - 1, day);
-
-                    // 今日の日付をリセットして比較
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    validUntil.setHours(0, 0, 0, 0);
-
-                    if (storedAccountId === accountId) {
-                        if (today <= validUntil) {
-                            window.location.href = 'quiz.html';
-                            return;
-                        } else {
-                            document.getElementById('error-message').textContent = "アカウントの有効期限が切れています。";
-                            return;
-                        }
-                    }
+                if (storedAccountId === accountId && today <= validUntil) {
+                    window.location.href = 'quiz.html';
+                    return;
                 }
             }
-
-            document.getElementById('error-message').textContent = "アカウントIDが無効です。";
-        })
-        .catch(error => {
-            console.error("認証エラー:", error);
-            document.getElementById('error-message').textContent = "認証中にエラーが発生しました。";
+            document.getElementById('error-message').textContent = "アカウントIDが無効か、期限切れです。";
         });
 }
 
@@ -60,9 +44,7 @@ function fetchQuestions() {
         .then(response => response.text())
         .then(text => {
             const json = JSON.parse(text.substring(47).slice(0, -2));
-            const rows = json.table.rows;
-
-            return rows.map(row => ({
+            return json.table.rows.map(row => ({
                 question: row.c[0].v,
                 options: [row.c[1].v, row.c[2].v, row.c[3].v],
                 correct: row.c[4].v,
@@ -71,7 +53,7 @@ function fetchQuestions() {
         });
 }
 
-// 試験の開始
+// コース選択による試験開始
 function startCourse(numQuestions, timeLimit) {
     document.getElementById('course-selection').style.display = 'none';
     document.getElementById('quiz-area').style.display = 'block';
@@ -124,29 +106,69 @@ function renderQuestion(index) {
         li.onclick = () => handleAnswer(index, option, li);
         answerList.appendChild(li);
     });
+
+    renderNavButtons();
 }
 
 // 解答の処理
 function handleAnswer(questionIndex, selectedOption, liElement) {
-    const questionData = questions[questionIndex];
-
-    if (answeredQuestions.has(questionIndex)) return;  // 二重回答防止
+    if (answeredQuestions.has(questionIndex)) return;  // 二重回答を防止
 
     answeredQuestions.add(questionIndex);
+    const questionData = questions[questionIndex];
+
     if (selectedOption === questionData.correct) {
         score++;
-        liElement.style.backgroundColor = '#4caf50';  // 正解の場合の色
+        liElement.style.backgroundColor = '#4caf50';  // 正解の色
     } else {
         incorrectQuestions.push(questionData);
-        liElement.style.backgroundColor = '#f44336';  // 不正解の場合の色
+        liElement.style.backgroundColor = '#f44336';  // 不正解の色
     }
 
-    // 自動的に次の問題へ進む
-    if (currentQuestionIndex + 1 < questions.length) {
-        setTimeout(() => renderQuestion(currentQuestionIndex + 1), 1000);
-    } else {
-        setTimeout(showResults, 1000);
+    setTimeout(() => {
+        if (currentQuestionIndex + 1 < questions.length) {
+            renderQuestion(currentQuestionIndex + 1);
+        } else {
+            showResults();
+        }
+    }, 1000);
+}
+
+// 前の問題へ戻る
+function prevQuestion() {
+    if (currentQuestionIndex > 0) {
+        renderQuestion(currentQuestionIndex - 1);
     }
+}
+
+// 次の問題へ進む
+function nextQuestion() {
+    if (currentQuestionIndex + 1 < questions.length) {
+        renderQuestion(currentQuestionIndex + 1);
+    }
+}
+
+// 問題のスキップ
+function skipQuestion() {
+    if (currentQuestionIndex + 1 < questions.length) {
+        renderQuestion(currentQuestionIndex + 1);
+    } else {
+        renderQuestion(0);
+    }
+}
+
+// ナビゲーションボタンの表示
+function renderNavButtons() {
+    const navButtons = document.getElementById('nav-buttons');
+    navButtons.innerHTML = '';
+
+    questions.forEach((_, i) => {
+        const button = document.createElement('button');
+        button.textContent = i + 1;
+        button.classList.add(answeredQuestions.has(i) ? 'answered' : 'unanswered');
+        button.onclick = () => renderQuestion(i);
+        navButtons.appendChild(button);
+    });
 }
 
 // 結果の表示
@@ -195,3 +217,13 @@ function showPastResults() {
         resultsList.appendChild(li);
     });
 }
+
+// TOPに戻る
+function goToTop() {
+    clearInterval(timerInterval);
+    document.getElementById('quiz-area').style.display = 'none';
+    document.getElementById('result-area').style.display = 'none';
+    document.getElementById('past-results-area').style.display = 'none';
+    document.getElementById('course-selection').style.display = 'block';
+}
+
