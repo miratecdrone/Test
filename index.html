@@ -3,61 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>模擬試験システム</title>
-    <link rel="stylesheet" href="style.css">
+    <title>ログイン - 模擬試験システム</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
     <header>
-        <h1>模擬試験システム</h1>
-        <nav>
-            <ul>
-                <li><a href="#" onclick="goToTop()">TOPへ戻る</a></li>
-                <li><a href="#" onclick="showPastResults()">過去の実績</a></li>
-            </ul>
-        </nav>
+        <h1>模擬試験システム - ログイン</h1>
     </header>
 
     <main>
-        <!-- コース選択画面 -->
-        <div id="course-selection">
-            <h2>試験コースを選択してください</h2>
-            <button onclick="startCourse(30, 30)">30問コース (30分)</button>
-            <button onclick="startCourse(50, 50)">50問コース (50分)</button>
-            <button onclick="startCourse(70, 70)">70問コース (70分)</button>
-        </div>
-
-        <!-- 試験画面 -->
-        <div id="quiz-area" style="display: none;">
-            <div id="timer">残り時間: <span id="time-left"></span></div>
-            <h2 id="question-text">問題が読み込まれています...</h2>
-            <ul id="answer-list"></ul>
-
-            <div id="controls">
-                <button id="prev-btn">前の問題</button>
-                <button id="skip-btn">スキップ</button>
-                <button id="next-btn">次の問題</button>
-            </div>
-
-            <div id="nav-buttons"></div>
-            <button onclick="goToTop()">TOPへ戻る</button>
-        </div>
-
-        <!-- 結果表示画面 -->
-        <div id="result-area" style="display: none;">
-            <h2>試験結果</h2>
-            <p>点数: <span id="score"></span> 点</p>
-            <h3>間違えた問題と解説</h3>
-            <ul id="incorrect-answers"></ul>
-            <button onclick="saveResult()">結果を保存</button>
-            <button onclick="goToTop()">TOPへ戻る</button>
-        </div>
-
-        <!-- 過去の試験結果 -->
-        <div id="past-results-area" style="display: none;">
-            <h2>過去の試験結果</h2>
-            <ul id="past-results-list"></ul>
-            <button onclick="goToTop()">TOPへ戻る</button>
+        <div class="login-form">
+            <h2>アカウント認証</h2>
+            <input type="text" id="account-id" placeholder="アカウントIDを入力">
+            <button onclick="authenticateUser()">ログイン</button>
+            <p id="error-message" class="error-message"></p>
         </div>
     </main>
 

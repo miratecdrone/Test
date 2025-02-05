@@ -4,16 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>模擬試験</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1 id="timer">残り時間：00:00</h1>
-    <div id="quiz-container">
-        <h2 id="question-title">問題文がここに表示されます</h2>
-        <ul id="answers-list"></ul>
-        <button onclick="nextQuestion()">次の問題へ</button>
-    </div>
-    <button onclick="goToTitle()">タイトルへ戻る</button>
+
+    <header>
+        <h1>模擬試験システム</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">TOPに戻る</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="quiz-area">
+        <div id="timer">残り時間: <span id="time-left"></span></div>
+        <h2 id="question-text">問題が読み込まれています...</h2>
+        <ul id="answer-list"></ul>
+
+        <div id="controls">
+            <button id="prev-btn">前の問題</button>
+            <button id="skip-btn">スキップ</button>
+            <button id="next-btn">次の問題</button>
+        </div>
+
+        <div id="nav-buttons"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 模擬試験システム</p>
+    </footer>
 
     <script src="script.js"></script>
 </body>
