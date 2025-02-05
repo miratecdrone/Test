@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スプレッドシートからリストを表示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>スプレッドシートから動的にリストを表示</h1>
+    <div id="list-container">リストを取得中...</div>
+
+    <script>
+        // GoogleスプレッドシートのJSONデータを取得
+        const sheetId = '1EmLHs1hDz7ECYz8GwHmY9tiHh-Vh4MiWHCx7UgHCASQ';  // SHEET_IDを入れる
+        const url = `https://spreadsheets.google.com/feeds/list/${sheetId}/od6/public/values?alt=json`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('list-container');
+                container.innerHTML = '';  // 初期表示の「リストを取得中」をクリア
+
+                // スプレッドシートのエントリごとにリストを作成
+                data.feed.entry.forEach(entry => {
+                    const listItem = document.createElement('div');
+                    listItem.classList.add('item');
+
+                    // スプレッドシートの各列のデータを取得
+                    const name = entry['gsx$リスト名']['$t'];
+                    const link = entry['gsx$リンク']['$t'];
+                    const description = entry['gsx$説明']['$t'];
+
+                    // HTMLのリスト要素を作成
+                    listItem.innerHTML = `
+                        <h3>${name}</h3>
+                        <p>${description}</p>
+                        <a href="${link}" target="_blank">リンクを見る</a>
+                    `;
+                    container.appendChild(listItem);
+                });
+            })
+            .catch(error => {
+                document.getElementById('list-container').innerText = 'データの取得に失敗しました。';
+                console.error('エラーが発生しました:', error);
+            });
+    </script>
+</body>
+</html>
