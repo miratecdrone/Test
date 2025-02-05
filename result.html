@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>結果表示</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>過去の試験結果</h1>
+    <div id="result-list"></div>
+    <button onclick="goToTitle()">タイトルへ戻る</button>
+
+    <script>
+        function loadResults() {
+            const results = JSON.parse(localStorage.getItem('pastResults')) || [];
+            const resultList = document.getElementById('result-list');
+            resultList.innerHTML = results.map(result => `
+                <div>
+                    <h3>試験日: ${new Date(result.date).toLocaleString()}</h3>
+                    <p>正解数: ${result.score} / ${result.totalQuestions}</p>
+                    <p>経過時間: ${result.timeSpent}秒</p>
+                    <h4>間違えた問題:</h4>
+                    ${result.incorrect.map(inc => `<p>${inc.question} - 解説: ${inc.explanation}</p>`).join('')}
+                </div>
+                <hr>
+            `).join('');
+        }
+
+        function goToTitle() {
+            window.location.href = 'index.html';
+        }
+
+        window.onload = loadResults;
+    </script>
+</body>
+</html>
