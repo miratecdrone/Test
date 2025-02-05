@@ -26,13 +26,14 @@
 
     <main id="quiz-area" style="display: none;">
         <div id="timer">残り時間: <span id="time-left"></span></div>
+        <h3 id="current-question-number">1問目</h3>
         <h2 id="question-text">問題が読み込まれています...</h2>
         <ul id="answer-list"></ul>
 
         <div id="controls">
             <button id="prev-btn" onclick="prevQuestion()">前の問題</button>
-            <button id="skip-btn" onclick="skipQuestion()">スキップ</button>
             <button id="next-btn" onclick="nextQuestion()">次の問題</button>
+            <button id="submit-btn" onclick="showResults()">採点する</button>
         </div>
 
         <div id="nav-buttons"></div>
