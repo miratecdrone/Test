@@ -10,11 +10,6 @@
 
     <header>
         <h1>模擬試験結果</h1>
-        <nav>
-            <ul>
-                <li><a href="#" onclick="goToTop()">TOPに戻る</a></li>
-            </ul>
-        </nav>
     </header>
 
     <main>
@@ -22,11 +17,17 @@
         <p>点数: <span id="score"></span> 点</p>
         <h3>間違えた問題と解説</h3>
         <ul id="incorrect-answers"></ul>
+        <button onclick="goToCourse()">コース選択に戻る</button>
     </main>
 
     <footer>
         <p>&copy; 2025 模擬試験システム</p>
     </footer>
 
+    <script>
+        function goToCourse() {
+            window.location.href = 'course.html';
+        }
+    </script>
 </body>
 </html>
