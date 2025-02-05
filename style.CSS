@@ -14,9 +14,26 @@ header {
 }
 
 header h1 {
-    font-size: 2.5rem;
     color: #f0c674;
-    margin: 0;
+    font-size: 2.5rem;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #f0c674;
+    text-decoration: none;
+    font-size: 1.2rem;
 }
 
 main {
@@ -28,80 +45,34 @@ main {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-#question-area {
-    padding: 20px;
-}
-
-h2 {
-    color: #f0c674;
-}
-
-#answer-list {
-    list-style: none;
-    padding: 0;
-}
-
-#answer-list li {
-    background-color: #333;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#answer-list li:hover {
-    background-color: #555;
-}
-
-#controls {
-    text-align: center;
-    margin: 20px 0;
-}
-
 button {
     padding: 10px 20px;
-    margin: 5px;
+    margin: 10px;
     font-size: 1rem;
     background-color: #f0c674;
-    color: #111;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
 button:hover {
     background-color: #e0b860;
 }
 
-
-#controls button, #quiz-area button, #result-area button, #past-results-area button {
-    margin-top: 15px;
-}
-
-
-
-#navigation {
-    padding: 20px;
-    background-color: #1a1a1a;
-    border-radius: 10px;
-}
-
-#nav-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.nav-btn {
-    padding: 10px 15px;
-    background-color: #333;
-    color: #e0e0e0;
+#nav-buttons button {
+    padding: 10px;
+    margin: 5px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    color: #fff;
+    background-color: #333;
 }
 
-.nav-btn.solved {
-    background-color: #f0c674;
+#nav-buttons button.solved {
+    background-color: #4caf50;
+}
+
+#nav-buttons button:hover {
+    background-color: #555;
 }
