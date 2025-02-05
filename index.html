@@ -3,108 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>クイズアプリ - スプレッドシートからデータ取得</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .question-box {
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        .choices {
-            margin-top: 10px;
-        }
-        .choice {
-            padding: 10px;
-            background-color: #f0f0f0;
-            margin-bottom: 5px;
-            cursor: pointer;
-        }
-        .choice:hover {
-            background-color: #d9d9d9;
-        }
-        .result {
-            margin-top: 15px;
-            font-weight: bold;
-        }
-    </style>
+    <title>模擬試験システム</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>スプレッドシートからクイズ表示</h1>
-    <div id="quiz-container">データを読み込んでいます...</div>
+    <header>
+        <h1>模擬試験システム</h1>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="goToTop()">TOPへ戻る</a></li>
+                <li><a href="#" onclick="showPastResults()">過去の実績</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <script>
-        async function loadQuizData() {
-            const sheetId = '1EmLHs1hDz7ECYz8GwHmY9tiHh-Vh4MiWHCx7UgHCASQ'; // スプレッドシートのID
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`;
+    <main>
+        <!-- コース選択画面 -->
+        <div id="course-selection">
+            <h2>試験コースを選択してください</h2>
+            <button onclick="startCourse(30, 30)">30問コース (30分)</button>
+            <button onclick="startCourse(50, 50)">50問コース (50分)</button>
+            <button onclick="startCourse(70, 70)">70問コース (70分)</button>
+        </div>
 
-            try {
-                const response = await fetch(csvUrl);
-                const csvText = await response.text();
-                const rows = csvText.split('\n').map(row => row.split(','));
+        <!-- 試験画面 -->
+        <div id="quiz-area" style="display: none;">
+            <div id="timer">残り時間: <span id="time-left"></span></div>
+            <h2 id="question-text">問題が読み込まれています...</h2>
+            <ul id="answer-list"></ul>
 
-                // 見出し行をスキップし、データを処理
-                const quizData = rows.slice(1).map(row => ({
-                    question: row[0],  // 問題文
-                    choiceA: row[1],   // 選択肢a
-                    choiceB: row[2],   // 選択肢b
-                    choiceC: row[3],   // 選択肢c
-                    correctAnswer: row[4],  // 正解
-                    explanation: row[5]  // 解説
-                }));
+            <div id="controls">
+                <button id="prev-btn">前の問題</button>
+                <button id="skip-btn">スキップ</button>
+                <button id="next-btn">次の問題</button>
+            </div>
 
-                displayQuiz(quizData);
-            } catch (error) {
-                document.getElementById('quiz-container').innerText = 'データの取得に失敗しました。';
-                console.error('エラー:', error);
-            }
-        }
+            <div id="nav-buttons"></div>
+            <button onclick="goToTop()">TOPへ戻る</button>
+        </div>
 
-        function displayQuiz(quizData) {
-            const container = document.getElementById('quiz-container');
-            container.innerHTML = '';  // コンテナをクリア
+        <!-- 結果表示画面 -->
+        <div id="result-area" style="display: none;">
+            <h2>試験結果</h2>
+            <p>点数: <span id="score"></span> 点</p>
+            <h3>間違えた問題と解説</h3>
+            <ul id="incorrect-answers"></ul>
+            <button onclick="saveResult()">結果を保存</button>
+            <button onclick="goToTop()">TOPへ戻る</button>
+        </div>
 
-            quizData.forEach((quiz, index) => {
-                // 問題ごとのコンテナを作成
-                const questionBox = document.createElement('div');
-                questionBox.classList.add('question-box');
-                questionBox.innerHTML = `
-                    <h3>問題 ${index + 1}: ${quiz.question}</h3>
-                    <div class="choices">
-                        <div class="choice" data-answer="${quiz.choiceA}" data-correct="${quiz.correctAnswer}" data-explanation="${quiz.explanation}">${quiz.choiceA}</div>
-                        <div class="choice" data-answer="${quiz.choiceB}" data-correct="${quiz.correctAnswer}" data-explanation="${quiz.explanation}">${quiz.choiceB}</div>
-                        <div class="choice" data-answer="${quiz.choiceC}" data-correct="${quiz.correctAnswer}" data-explanation="${quiz.explanation}">${quiz.choiceC}</div>
-                    </div>
-                    <div class="result" id="result-${index}"></div>
-                `;
+        <!-- 過去の試験結果 -->
+        <div id="past-results-area" style="display: none;">
+            <h2>過去の試験結果</h2>
+            <ul id="past-results-list"></ul>
+            <button onclick="goToTop()">TOPへ戻る</button>
+        </div>
+    </main>
 
-                container.appendChild(questionBox);
+    <footer>
+        <p>&copy; 2025 模擬試験システム</p>
+    </footer>
 
-                // 選択肢にクリックイベントを付与
-                questionBox.querySelectorAll('.choice').forEach(choice => {
-                    choice.addEventListener('click', () => {
-                        const selectedAnswer = choice.getAttribute('data-answer');
-                        const correctAnswer = choice.getAttribute('data-correct');
-                        const explanation = choice.getAttribute('data-explanation');
-                        const resultBox = document.getElementById(`result-${index}`);
-
-                        if (selectedAnswer === correctAnswer) {
-                            resultBox.innerHTML = `<span style="color: green;">正解！</span> - ${explanation}`;
-                        } else {
-                            resultBox.innerHTML = `<span style="color: red;">不正解！</span> 正解は「${correctAnswer}」。<br>${explanation}`;
-                        }
-                    });
-                });
-            });
-        }
-
-        // ページ読み込み時にクイズデータを取得
-        loadQuizData();
-    </script>
-
+    <script src="script.js"></script>
 </body>
 </html>
